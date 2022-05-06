@@ -227,6 +227,42 @@ module.exports = {
         <p>
             The next code piece I am using is settingsPage.jsx. I am claiming the entirety of this file.
         </p>
+        <br>
+        <p>
+            This was the only page I made on the frontend, since I was primarily on the backend. I learned a lot of making this, and despite it being my first
+            attempt at making a page in React, I think a lot here went right, so I wanted to include it.
+        </p>
+        <br>
+        <p>
+            First, this page takes into account security. The session authentication tokens I mentioned before are utilized here. On lines 32-40 I am setting
+            up the page with the user's information. I am accessing data specific to the user logged in though, so it is important that this is done with security
+            in mind. For that reason, the "Authorization" header is used, and the JWT token is included. This ensures that none of the user's information
+            can be accessed unless the token is correct and the user is who they claim to be.
+        </p>
+        <br>
+        <p>
+            Similarly, the sign-out button also respects security. The sign-out button calls the function on lines 81-89. This function once again utilizes
+            session authentication to make sure the user is who they claim to be, and are not trying to access data they should not be able to interact with.
+            This portion of the code is especially important to security though because it calls an endpoint to delete JWT tokens from the account. If a user
+            uses a shared-device, the ability to remove tokens from their computer is extremely important. Without this option, anyone who uses their device
+            could access their sensitive information.
+        </p>
+        <br>
+        <p>
+            Next, the page itself follows good UI design and accessibility. All elements are well-separated, contrast well, and have placeholder text that a screen reader could use
+            to tell the user what information is expected of them. The page has a score of 94 from Google's Lighthouse metrics. This shows that it was successful in
+            being clear and easy to use. We discussed in class how a huge portion of the population suffers from disabilities, so accessibility is a necessity
+            for any website.
+        </p>
+        <br>
+        <p>
+            Along the lines of accessibility, this page is extremely clear. Descriptions like on lines 140 and 146 tell the other exactly what will happen if they
+            perform certain actions. If you approve email notifications, it says you will be sent an email one week after your last message, for example. Descriptions
+            such as these take away any ambiguity and makes our website easy to use and ensures it reacts in a predictable way. We discussed how websites should
+            always be predictable, and that idea was put into every element on this page. Clicking a checkbox on means that the boolean value associated with it will
+            be set to true. It would be extremely confusing to a user if a checkbox that is on means that the value is false. Small details such as these help to keep
+            the page easy to use and helps users avoid frustration from a poor UI.
+        </p>
     </div>
     <div class="file-description">
         <p>settingsPage.jsx</p>
@@ -270,7 +306,7 @@ class SettingsPage extends Component {
         })
             .then(response => response.json())
             .then(data => this.setState({isPrivate: data.isPrivate,
-            notifications: data.notifications, username: data.username})).then(()=> console.log(this.state))
+            notifications: data.notifications, username: data.username}))
     }
 
     handleChange(event) {
@@ -320,7 +356,6 @@ class SettingsPage extends Component {
         });
         localStorage.clear();
         window.location.href='/';
-
     }
 
     // update user info based on input fields
