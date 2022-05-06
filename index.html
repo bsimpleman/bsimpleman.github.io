@@ -25,9 +25,9 @@
         it would be much less practical. The option to query for only a certain amount is very important for making sure the website can handle any amount of users and
         can adapt to new situations.</p>
         <br>
-        <p>Finally, I think I did a good job of abstracting out code here. You can see on lines 54-56 that the only thing I'm actually exporting here is the readLeaderboard
-            function. There's 4 functions in this file, but only readLeaderboard needs to be available to other files. By using abstraction in this way the security of the program
-            is improved, and it helps make the program less prone to errors.
+        <p>Finally, I think I did a good job of abstracting out code and keeping certain code private to the class here. You can see on lines 54-56 that the only thing I'm actually exporting here is the readLeaderboard
+            function. There's 4 functions in this file, but only readLeaderboard needs to be available to other files. This helps to improve the security of the program,
+            and it helps make the program less prone to errors.
         </p>
     </div>
     <div class="file-description">
@@ -429,6 +429,245 @@ class SettingsPage extends Component {
 export default SettingsPage;
         </code></pre>
     </div>
+    <div class="paragraph-sm">
+        <p>
+            The final code piece I am including is userController.js. I am claiming the entirety of this file.
+        </p>
+        <br>
+        <p>
+            There is a lot going on in this file. It is the controller for the majority of interactions relating to users, such as signing up,
+            logging in, logging out, creating a new users, updating a user, etc. This controller is the most significant portion of the backend.
+        </p>
+        <br>
+        <p>
+            One of the most important sections of this code is lines 7-13. This is where the JWT token is created I have referenced in earlier code pieces is created. If this was a real project for production,
+            I would use environment variables here, but for the sake of the scope of this project everything in this function is exposed. In this function I use
+            a unique identifier for the user, a salt, and an expiry date to create a unique token for session authentication. This token is then appended onto the
+            user 's database collection for future use. This function is the foundation for the security of the website.
+        </p>
+        <br>
+        <p>
+            Lines 23-43 handle user login. The aspect of this code I want to highlight is that it takes the email/password and uses a hashing algorithm
+            to make sure the data matches the encrypted data in the database. I used the bcrypt library to handle this.
+            This was an important decision because I had to look into how to most securely encrypt password.
+            Common methods like using MD5 are actually very vulnerable. Bcrypt is based on the "blowfish block
+            cipher cryptomatic algorithm" though, which has been shown be very secure. Despite this security, there
+            are still some risks. We discussed in class how libraries can be vulnerable. For this reason, it is very important to
+            always keep bcrypt up to date to handle any new vulnerabilities that can exist. Also, bcrypt uses a salted hash,
+            so it is important that my salt was not easily guessed.
+        </p>
+        <br>
+        <p>
+            The final piece of code here I would like to highlight is lines 74-96. This code checks to see if an email or username is already in use.
+            This piece of functionality was very important when we were implementing the sign-up system. It is important that users cannot have conflicting
+            information. If it was possible for multiple users to use the same email, a "forgot password" button in the future could go to all of the users'
+            inboxes and create a security threat. For this reason, having code implemented that is capable of ensuring that a username and email and unique
+            was a very important addition.
+        </p>
+
+    </div>
+    <div class="file-description">
+        <p>userController.js</p>
+    </div>
+    <div class="codeblock-sm">
+        <pre class="line-numbers"><code class="language-js">
+const mongoConnection = require("../utils/database");
+const encrypt = require("../utils/encrypt")
+const jwt = require('jsonwebtoken');
+const {ObjectId: objectID} = require("mongodb");
+
+const createToken = async (user) => {
+    const db = mongoConnection.getDb();
+    const token = jwt.sign({_id: user.username}, 'Z5YWzh5F2D', {expiresIn: '7 days'});
+    db.collection('users').updateOne({username: user.username}, {$push: {"tokens" : {"token" : token}}});
+    return token;
+}
+
+const signupUser = async (req, res) => {
+    const db = mongoConnection.getDb();
+    const user = req.body;
+    user.password = await encrypt.createHash(user.password);
+    db.collection('users').insertOne(user);
+    const token = await createToken(user);
+    res.status(200).send({user, token})
+}
+
+const loginUser = async (req, res) => {
+    const db = mongoConnection.getDb();
+    const email = await req.body.email;
+    const password = await req.body.password;
+    const validEmail = await db.collection('users').find({email: req.body.email});
+    const arrayEmail = await validEmail.toArray();
+    //Fail if no valid user is found.
+    if (arrayEmail.length === 0) {
+        res.status(401).send("Invalid email");
+        return;
+    }
+    const isCorrectPassword = await encrypt.checkHash(password, email);
+        //Pass if password is correct.
+        if (isCorrectPassword) {
+            const user = await db.collection('users').findOne({email: req.body.email});
+            const token = await createToken(user)
+            res.status(200).send({user, token})
+        } else {
+            res.status(401).send('Incorrect password')
+        }
+}
+
+const logoutUser = async (req, res) => {
+    const db = mongoConnection.getDb();
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token !== req.token
+        });
+        await db.collection('users').updateOne(
+            {username: req.user.username},
+            {$set: {tokens: req.user.tokens}}
+        )
+        res.sendStatus(200)
+    } catch (e) {
+        res.status(500).send();
+    }
+}
+
+const logoutAllUserSessions = async (req, res) => {
+    const db = mongoConnection.getDb();
+    try {
+        await db.collection('users').updateOne(
+            {username: req.user.username},
+            {$set: {tokens: []}}
+        )
+        res.sendStatus(200)
+    } catch (e) {
+        res.status(500).send();
+    }
+}
+
+const isExistingUser = async (req, res) => {
+    const db = mongoConnection.getDb();
+    const validUsername = await db.collection('users').find({username: req.query.username});
+    const arrayUsername = await validUsername.toArray();
+    if (arrayUsername.length > 0 ) {
+        res.status(401).send("Existing user");
+        return;
+    } else {
+        res.status(200).send("User does not exist")
+    }
+}
+
+const isExistingEmail = async (req, res) => {
+    const db = mongoConnection.getDb();
+    const validEmail = await db.collection('users').find({email: req.query.email});
+    const arrayEmail = await validEmail.toArray();
+    if (arrayEmail.length > 0) {
+        res.status(401).send("Email in use");
+        return;
+    } else {
+        res.status(200).send("Email does not exist")
+    }
+}
+
+const createUser = async (req, res) => {
+    const db = mongoConnection.getDb();
+    const user = req.body;
+    db.collection('users').insertOne(user);
+    res.status(200).send('Created user');
+}
+
+const getPublicUserData = async (req, res) => {
+    const db = mongoConnection.getDb();
+    //Empty array passed to find() returns all users.
+    const users = await db.collection('users').find({}).toArray();
+    const userList = []
+    let index = 0;
+    for (const user of users) {
+        index++;
+        //If the user is public, this is their user info.
+        if (user.isPrivate === false) {
+            userList.push({
+                name: user.name,
+                username: user.username,
+                bio: user.bio,
+                funds: user.funds,
+                trophies: user.trophies,
+                image: user.profileImg,
+                isPrivate: "false"
+            })
+        //If the user is private, some user info is blocked.
+        } else {
+            userList.push({
+                name: user.name,
+                username: user.username,
+                bio: user.bio,
+                funds: "private",
+                trophies: "private",
+                image: user.profileImg,
+                isPrivate: "true"
+            })
+        }
+    }
+    res.status(200).send(userList);
+}
+
+const readUser = (req, res) => {
+    const db = mongoConnection.getDb();
+    if (!req.query.username && !req.query.email && !req.query.id) {
+        return res.send("You must add a query for a specific user");
+    } else if (req.query.username) {
+        db.collection('users').findOne({username: req.query.username})
+            .then(user => res.status(200).send(user));
+    } else if (req.query.email) {
+        db.collection('users').findOne({email: req.query.email})
+            .then(user => res.status(200).send(user));
+    } else if (req.query.id) {
+        const objectID = require('mongodb').ObjectId;
+        db.collection('users').findOne({"_id": new objectID(req.query.id)})
+            .then(user => res.status(200).send(user));
+    }
+}
+
+const updateUser = async (req, res) => {
+    const db = mongoConnection.getDb();
+    if (req.body.password !== undefined) {
+        req.body.password = await encrypt.createHash(req.body.password);
+    }
+    console.log(req.body.password)
+    for (let key in req.body) {
+        await updateUserHelper(db, key, req);
+    }
+
+    res.status(200).send('Updated user');
+}
+
+const updateUserHelper = async (db, key, req) => {
+    db.collection('users').updateOne(
+        {username: req.query.username},
+        {$set: {[key]: req.body[key]}}
+    )
+}
+
+const deleteUser = (req, res) => {
+    const db = mongoConnection.getDb();
+
+    db.collection('users').deleteOne({username: req.body.username}).then(() => {
+        res.status(200).send('Deleted user');
+    });
+}
+
+module.exports = {
+    createUser,
+    readUser,
+    updateUser,
+    deleteUser,
+    signupUser,
+    loginUser,
+    logoutUser,
+    logoutAllUserSessions,
+    getPublicUserData,
+    isExistingUser,
+    isExistingEmail
+}
+        </code></pre>
 </div>
 <script src="prism.js"></script>
 </body>
