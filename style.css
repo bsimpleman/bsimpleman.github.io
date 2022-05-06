@@ -1,0 +1,50 @@
+html, body {
+    margin: 0;
+    background-color: #553D67;
+    box-sizing: border-box;
+}
+
+.codeblock-sm {
+    width: 60%;
+}
+
+.paragraph-sm {
+    background-color: #99738E;
+    width: 60%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.paragraph-sm p {
+    padding-left: 50px;
+    padding-right: 50px;
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+#main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#header {
+    display: flex;
+    justify-content: center;
+    background-color: #2d2d2d;
+    color: #cccccc;
+    font-size: 26px;
+}
+
+/* The sticky class is added to the header with JS when it reaches its scroll position */
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%
+}
+
+/* Add some top padding to the page content to prevent sudden quick movement (as the header gets a new position at the top of the page (position:fixed and top:0) */
+.sticky + #main-container {
+    padding-top: 102px;
+}
