@@ -5,12 +5,15 @@ html, body {
 }
 
 .codeblock-sm {
-    width: 60%;
+    width: 65%;
+    min-width: 750px;
+    margin-top: 0;
 }
 
 .paragraph-sm {
     background-color: #99738E;
-    width: 60%;
+    width: 65%;
+    min-width: 750px;
     margin-top: 50px;
     margin-bottom: 50px;
 }
@@ -47,4 +50,19 @@ html, body {
 /* Add some top padding to the page content to prevent sudden quick movement (as the header gets a new position at the top of the page (position:fixed and top:0) */
 .sticky + #main-container {
     padding-top: 102px;
+}
+
+.file-description {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    width: 300px;
+    background-color: #2d2d2d;
+    border: 5px #999999 solid;
+}
+
+.file-description p {
+    font-size: 24px;
+    color: #cccccc;
 }

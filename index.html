@@ -12,9 +12,26 @@
 </div>
 <div id="main-container">
     <div class="paragraph-sm">
-        <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Varius morbi enim nunc faucibus a pellentesque sit. At elementum eu facilisis sed odio morbi quis commodo odio. Sed felis eget velit aliquet sagittis id consectetur purus ut. Suspendisse potenti nullam ac tortor vitae purus faucibus. Sagittis orci a scelerisque purus semper eget duis at. Habitant morbi tristique senectus et netus et. Imperdiet sed euismod nisi porta lorem mollis aliquam ut porttitor. At urna condimentum mattis pellentesque id nibh tortor. Viverra suspendisse potenti nullam ac. Quis vel eros donec ac. Gravida quis blandit turpis cursus in. Ultricies tristique nulla aliquet enim tortor at auctor urna nunc.
+        <p>The first code piece I would like to look at is my work on leaderboardController.js as shown below. I am claiming the entirety of this file.</p>
+        <br>
+        <p>There are many portions of this code that reflect lessons we have learned in class. Looking at lines 26-32 we can see how this code respects
+        the privacy lessons we learned in class. Throughout the semester the priority of user security was consistently emphasized. On these lines
+        of code I made sure to check if the user had a public or private profile before allowing any of there information to be added to the userList object.</p>
+        <br>
+        <p>Another aspect of this code I am proud of is how flexible it is. We have learned about the importance of creating maintainable and scalable code.
+        You can see from lines 3-17 that this code is able to handle different kinds of requests. You can query this with no information, which results in
+        all user data being sorted in sent back. You also choose to include a "top="x" query, which takes that value and only returns the top "x" amount of users.
+        By coding this in this way it helps make the code much more scalable. Maybe right now querying for every user is reasonable. If there was a million users though
+        it would be much less practical. The option to query for only a certain amount is very important for making sure the website can handle any amount of users and
+        can adapt to new situations.</p>
+        <br>
+        <p>Finally, I think I did a good job of abstracting out code here. You can see on lines 54-56 that the only thing I'm actually exporting here is the readLeaderboard
+            function. There's 4 functions in this file, but only readLeaderboard needs to be available to other files. By using abstraction in this way the security of the program
+            is improved, and it helps make the program less prone to errors.
         </p>
+    </div>
+    <div class="file-description">
+        <p>leaderboardController.js</p>
     </div>
     <div class="codeblock-sm">
         <pre class="line-numbers"><code class="language-js">const mongoConnection = require("../utils/database");
@@ -76,10 +93,29 @@ module.exports = {
     </div>
     <div class="paragraph-sm">
         <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Varius morbi enim nunc faucibus a pellentesque sit. At elementum eu facilisis sed odio morbi quis commodo odio. Sed felis eget velit aliquet sagittis id consectetur purus ut. Suspendisse potenti nullam ac tortor vitae purus faucibus. Sagittis orci a scelerisque purus semper eget duis at. Habitant morbi tristique senectus et netus et. Imperdiet sed euismod nisi porta lorem mollis aliquam ut porttitor. At urna condimentum mattis pellentesque id nibh tortor. Viverra suspendisse potenti nullam ac. Quis vel eros donec ac. Gravida quis blandit turpis cursus in. Ultricies tristique nulla aliquet enim tortor at auctor urna nunc.
+            The next piece of code I am claiming is signUpValidation.js. I am claiming the entirety of this file.
         </p>
         <br>
-        <p>Imperdiet dui accumsan sit amet nulla. Nibh tortor id aliquet lectus proin. Ut venenatis tellus in metus vulputate eu scelerisque. Morbi blandit cursus risus at ultrices mi tempus imperdiet. Leo vel orci porta non. Amet porttitor eget dolor morbi non arcu risus quis varius. Sagittis eu volutpat odio facilisis mauris sit amet. Praesent elementum facilisis leo vel fringilla. Viverra adipiscing at in tellus integer feugiat scelerisque. Diam volutpat commodo sed egestas egestas fringilla. Lacus suspendisse faucibus interdum posuere lorem ipsum dolor sit.</p>
+        <p>
+            Lines 56-70 all handle secure lessons we have learned in class. We have learned the importance of creating secure user information.
+            Encrypting information is a good start, but encryption only helps if the password is not so easy that it could be guessed with brute-force.
+            These lines of code help to keep users safe by forcing them into using safe password conventions. Regex is used to ensure passwords contains
+            a number. Passwords are checked to make sure they are a certain length, and also checked to make sure they have a capital letter. These restrictions
+            help to make sure the passwords on our website meet reasonable safety standards.
+        </p>
+        <br>
+        <p>
+            Along on lines of security, on lines 94-102 you can see where I implement session authentication. Signing up causes a token to be generated for the user.
+            These lines of codes do not handle the creation of the token, the signup endpoint handles that with JWT. Instead, this portion of code is taking advantage
+            of the token created by that endpoint and storing it for future use. This token can be used as a header in other endpoints to ensure the user trying to
+            access certain pieces of information is actually intended to be able to access them. Endpoint security is crucial for privacy and safety, so this portion
+            of code is essential to helping to keep the website and its user's data safe. We have spent a great portion of time talking about security in class, and
+            the usage of JWT with session authentication is a great example of how this code meets the standards we have discussed.
+
+        </p>
+    </div>
+    <div class="file-description">
+        <p>signUpValidation.js</p>
     </div>
     <div class="codeblock-sm">
         <pre class="line-numbers"><code class="language-js">
@@ -185,6 +221,177 @@ module.exports = {
                 // handle session authentication using the response information
                 localStorage.setItem('token', responseData.token);
             }
+        </code></pre>
+    </div>
+    <div class="paragraph-sm">
+        <p>
+            The next code piece I am using is settingsPage.jsx. I am claiming the entirety of this file.
+        </p>
+    </div>
+    <div class="file-description">
+        <p>settingsPage.jsx</p>
+    </div>
+    <div class="codeblock-sm">
+        <pre class="line-numbers"><code class="language-js">
+import React, { Component } from "react";
+import HeaderDrawer from "./headerDrawer.jsx";
+import InternalHeading from "./internalHeading"
+import Button from '@mui/material/Button';
+import './styles/settingsPage.css';
+import {verifyPassword} from "./scripts/signUpValidation.js"
+import {verifyEmail} from "./scripts/signUpValidation.js"
+import {verifyName} from "./scripts/signUpValidation.js"
+import {verifyUsername} from "./scripts/signUpValidation.js"
+import {createUser} from "./scripts/signUpValidation.js"
+import root from '../root'
+
+//reference: https://mui.com/components/drawers/
+
+class SettingsPage extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            name: '',
+            bio: '',
+            password: '',
+            passwordConfirmation: '',
+            isPrivate: false,
+            notifications: false
+        }
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    async componentDidMount() {
+        fetch(`${root}/api/user/self`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', "Authorization": localStorage.getItem("token")},
+        })
+            .then(response => response.json())
+            .then(data => this.setState({isPrivate: data.isPrivate,
+            notifications: data.notifications, username: data.username})).then(()=> console.log(this.state))
+    }
+
+    handleChange(event) {
+        const target = event.target;
+        const name = target.name;
+
+        this.setState({
+            [name]: event.target.value
+        });
+    }
+
+    // async handle submission of settings change
+    async handleSubmit(event) {
+        this.handleData()
+    }
+
+    // update user data based on settings changed
+    handleData() {
+        let valid = 1;
+        if (this.state.name !== '') {
+            if (verifyName(this.state.name) !== true) {
+                alert(verifyName(this.state.name));
+                valid = -1;
+            }
+        } else if (this.state.password !== '') {
+            if (this.state.password !== this.state.passwordConfirmation) {
+                alert("Passwords do not match!");
+                valid = -1;
+            } else if (verifyPassword(this.state.password) !== true) {
+                alert(verifyPassword(this.state.password));
+                valid = -1;
+            }
+        }
+
+        if (valid === 1) {
+            this.updateUser();
+            alert("Profile information saved!")
+        }
+    }
+
+    // sign out user from application
+    handleSignOut() {
+        console.log("here")
+        fetch(`${root}/api/signout`, {
+            method: "POST",
+            headers: {'Content-Type': 'application/json', "Authorization": localStorage.getItem("token")},
+        });
+        localStorage.clear();
+        window.location.href='/';
+
+    }
+
+    // update user info based on input fields
+    async updateUser() {
+        const newInfo = {}
+        if (this.state.name !== '') {
+            newInfo.name = this.state.name
+        }
+        if (this.state.password !== '') {
+            newInfo.password = this.state.password
+        }
+        if (this.state.bio !== '') {
+            newInfo.bio = this.state.bio
+        }
+        newInfo.isPrivate = this.state.isPrivate
+        newInfo.notifications = this.state.notifications
+
+        const jsonData = JSON.stringify(newInfo);
+
+        console.log(localStorage.getItem("token")._id)
+
+        fetch(`${root}/api/user?username=${this.state.username}`, {
+            method: "PATCH",
+            headers: {'Content-Type': 'application/json'},
+            body: jsonData
+        }).then(res => {
+            console.log("Request complete! response:", res);
+        });
+    }
+
+    render() {
+        return (
+            &ltReact.Fragment&gt
+                &ltInternalHeading className={"settings-heading"} title="Settings"&gt&lt/InternalHeading&gt
+                    &ltdiv id="content"&gt
+                        &ltHeaderDrawer index={5}&gt&lt/HeaderDrawer&gt
+                        &ltdiv id="main-settings-container"&gt
+                            &ltlabel htmlFor="name" className="settingsLabel"&gtChange name&lt/label&gt
+                            &ltinput type="text" name="name" data-testid="name-input" value={this.state.name} onChange={this.handleChange} placeholder="Enter new name" className="settingsEntry" required&gt&lt/input&gt
+
+                            &ltlabel htmlFor="password" className="settingsLabel"&gtChange password&lt/label&gt
+                            &ltinput type="text" name="password" data-testid="password-input" value={this.state.password} onChange={this.handleChange} placeholder="Enter new password" className="settingsEntry" required&gt&lt/input&gt
+                            &ltinput type="text" name="passwordConfirmation" data-testid="passwordConfirmation-input" value={this.state.passwordConfirmation} onChange={this.handleChange} placeholder="Confirm new password" className="settingsEntry" required&gt&lt/input&gt
+
+                            &ltlabel htmlFor="bio" className="settingsLabel"&gtChange bio&lt/label&gt
+                            &ltinput id = "bio" type="text" name="bio" data-testid="bio-input" value={this.state.bio} onChange={this.handleChange} placeholder="Enter new bio (55 character limit)" className="settingsEntry" maxlength="55" minlength="1" required&gt&lt/input&gt
+                        &lt/div&gt
+                        &ltdiv id={"bottom-options"}&gt
+                            &ltinput type="checkbox" id="privacy"  className="settings-checkbox" data-testid="privacy-checkbox" name="privacy" checked={!this.state.isPrivate} onChange={this.handleChange} onClick={ () =&gt { this.setState({ isPrivate: !this.state.isPrivate })}} required&gt&lt/input&gt
+                            &ltlabel htmlFor="privacy" for="privacy" className="checkboxLabel"&gtDisplay my information publicly&lt/label&gt
+                            &ltp id={"privacy-info"}&gt
+                                Enabling this will allow other users to see your tropies, FUNDs, and leaderboard rank.
+                            &lt/p&gt
+                            &ltbr/&gt
+                            &ltinput type="checkbox" id="notifications"  className="settings-checkbox" name="notification" data-testid="notifications-checkbox" checked={this.state.notifications} onChange={this.handleChange} onClick={ () =&gt {this.setState({ notifications: !this.state.notifications })}} required&gt&lt/input&gt
+                            &ltlabel htmlFor="notifications" for="notifications" className="checkboxLabel"&gtReceive email notifications&lt/label&gt
+                            &ltp id={"notifications-info"}&gt
+                                Notifications will be sent by email one week after your last message.
+                            &lt/p&gt
+
+                        &lt/div&gt
+                        &ltdiv id={"settings-buttons"}&gt
+                            &ltButton id="logout" data-testid='logout-button' variant="contained" size="large" onClick={() =&gt this.handleSignOut()}&gtLog Out&lt/Button&gt
+                            &ltButton id="save" data-testid='save-button' variant="contained" size="large" onClick={async () =&gt await this.handleSubmit()}&gtSave&lt/Button&gt
+                        &lt/div&gt
+                    &lt/div&gt
+            &lt/React.Fragment&gt
+        );
+    }
+}
+export default SettingsPage;
         </code></pre>
     </div>
 </div>
